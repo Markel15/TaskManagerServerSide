@@ -11,7 +11,7 @@ if ($accion !== 'register') {
 // Recoger y validar parámetros
 $username = trim($_POST['username'] ?? '');
 $password = trim($_POST['password'] ?? '');
-if(empty($username) || empty($password)){
+if (empty($username) || empty($password)) {
     echo json_encode(["error" => "Faltan datos"]);
     exit();
 }
@@ -22,7 +22,7 @@ $stmt = mysqli_prepare($con, $query);
 mysqli_stmt_bind_param($stmt, "s", $username);
 mysqli_stmt_execute($stmt);
 mysqli_stmt_store_result($stmt);
-if(mysqli_stmt_num_rows($stmt) > 0){
+if (mysqli_stmt_num_rows($stmt) > 0) {
     echo json_encode(["error" => "El usuario ya existe"]);
     mysqli_stmt_close($stmt);
     mysqli_close($con);
@@ -35,8 +35,9 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 $query = "INSERT INTO usuarios (username, password) VALUES (?, ?)";
 $stmt = mysqli_prepare($con, $query);
 mysqli_stmt_bind_param($stmt, "ss", $username, $hashedPassword);
-if(mysqli_stmt_execute($stmt)){
-    echo json_encode(["success" => "Usuario registrado correctamente"]);
+if (mysqli_stmt_execute($stmt)) {
+    $last_id = mysqli_insert_id($con);
+    echo json_encode(["success" => "Usuario registrado correctamente", "id" => $last_id]);
 } else {
     echo json_encode(["error" => "Error al registrar el usuario"]);
 }
