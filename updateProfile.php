@@ -3,36 +3,29 @@ include 'config.php';
 
 // Recoger y validar la acción
 $accion = $_POST['accion'] ?? '';
-if ($accion !== 'updateProfile') {
+if ($accion !== 'updateProfileImage') {
     echo json_encode(["error" => "Acción no válida"]);
     exit();
 }
 
 // Recoger parámetros
 $userId = $_POST['userId'] ?? '';
-$username = trim($_POST['username'] ?? '');
-$imagen = $_POST['imagen'] ?? ''; // Cadena Base64; puede ser vacía si no se actualiza
+$imagen = $_POST['imagen'] ?? '';
 
-if(empty($userId) || empty($username)){
+if (empty($userId) || empty($imagen)) {
     echo json_encode(["error" => "Faltan datos"]);
     exit();
 }
 
-// Preparamos la sentencia SQL según si se envía imagen o no
-if(!empty($imagen)) {
-    $query = "UPDATE usuarios SET username = ?, fotoPerfil = ? WHERE id = ?";
-    $stmt = mysqli_prepare($con, $query);
-    mysqli_stmt_bind_param($stmt, "ssi", $username, $imagen, $userId);
-} else {
-    $query = "UPDATE usuarios SET username = ? WHERE id = ?";
-    $stmt = mysqli_prepare($con, $query);
-    mysqli_stmt_bind_param($stmt, "si", $username, $userId);
-}
+// Actualizar solo la imagen de perfil
+$query = "UPDATE usuarios SET imagenPerfil = ? WHERE id = ?";
+$stmt = mysqli_prepare($con, $query);
+mysqli_stmt_bind_param($stmt, "si", $imagen, $userId);
 
-if(mysqli_stmt_execute($stmt)){
-    echo json_encode(["success" => "Perfil actualizado"]);
+if (mysqli_stmt_execute($stmt)) {
+    echo json_encode(["success" => "Imagen de perfil actualizada"]);
 } else {
-    echo json_encode(["error" => "Error al actualizar el perfil"]);
+    echo json_encode(["error" => "Error al actualizar la imagen de perfil"]);
 }
 
 mysqli_stmt_close($stmt);
