@@ -17,15 +17,31 @@ if (empty($userId) || empty($imagen)) {
     exit();
 }
 
+// Decodificar base64
+$imagenBinaria = base64_decode($imagen);
+if ($imagenBinaria === false) {
+    echo json_encode(["error" => "Error al decodificar imagen"]);
+    exit();
+}
+
 // Actualizar solo la imagen de perfil
 $query = "UPDATE usuarios SET imagenPerfil = ? WHERE id = ?";
 $stmt = mysqli_prepare($con, $query);
-mysqli_stmt_bind_param($stmt, "si", $imagen, $userId);
+
+if (!$stmt) {
+    echo json_encode(["error" => "Error al preparar la consulta: " . mysqli_error($con)]);
+    exit();
+}
+
+mysqli_stmt_bind_param($stmt, "bi", $null, $userId); // "b" para BLOB
+
+// Enviar BLOB manualmente
+mysqli_stmt_send_long_data($stmt, 0, $imagenBinaria);
 
 if (mysqli_stmt_execute($stmt)) {
     echo json_encode(["success" => "Imagen de perfil actualizada"]);
 } else {
-    echo json_encode(["error" => "Error al actualizar la imagen de perfil"]);
+    echo json_encode(["error" => "Error al ejecutar: " . mysqli_stmt_error($stmt)]);
 }
 
 mysqli_stmt_close($stmt);
