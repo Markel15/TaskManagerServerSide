@@ -17,6 +17,7 @@ $completado = $_POST['completado'] ?? 0;
 $prioridad = $_POST['prioridad'] ?? 0;
 $usuarioId = $_POST['usuarioId'] ?? 0;
 $coordenadas = trim($_POST['coordenadas'] ?? '');
+$localId = $_POST['localId'] ?? 0;
 
 if (empty($titulo) || $fechaCreacion == 0 || $fechaFinalizacion == 0 || $usuarioId == 0) {
     echo json_encode(["error" => "Faltan datos obligatorios"]);
@@ -24,9 +25,9 @@ if (empty($titulo) || $fechaCreacion == 0 || $fechaFinalizacion == 0 || $usuario
 }
 
 // Preparar la consulta para insertar la tarea
-$query = "INSERT INTO tareas (titulo, descripcion, fechaCreacion, FechaFinalizacion, completado, prioridad, usuarioId, localizacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$query = "INSERT INTO tareas (titulo, descripcion, fechaCreacion, FechaFinalizacion, completado, prioridad, usuarioId, localizacion, localId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = mysqli_prepare($con, $query);
-mysqli_stmt_bind_param($stmt, "ssiiiiis", $titulo, $descripcion, $fechaCreacion, $fechaFinalizacion, $completado, $prioridad, $usuarioId, $coordenadas);
+mysqli_stmt_bind_param($stmt, "ssiiiiisi", $titulo, $descripcion, $fechaCreacion, $fechaFinalizacion, $completado, $prioridad, $usuarioId, $coordenadas, $localId);
 
 if (mysqli_stmt_execute($stmt)) {
     $last_id = mysqli_insert_id($con);
