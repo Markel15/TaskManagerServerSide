@@ -27,7 +27,7 @@ if ($accion == 'crear') {
 
     if (mysqli_stmt_execute($stmt)) {
         $last_id = mysqli_insert_id($con);
-        echo json_encode(["success" => "Tarea creada correctamente", "id" => $last_id]);
+        echo json_encode(["success" => "Tarea creada correctamente", "id" => $last_id, "accion" => "crear"]);
     } else {
         echo json_encode(["error" => "Error al crear la tarea"]);
     }
@@ -55,9 +55,44 @@ elseif ($accion === 'editar') {
     mysqli_stmt_bind_param($stmt, "ssiiisii", $titulo, $descripcion, $fechaCreacion, $fechaFinalizacion, $prioridad, $coordenadas, $localId, $usuarioId);
 
     if (mysqli_stmt_execute($stmt)) {
-        echo json_encode(["success" => "Tarea actualizada correctamente"]);
+        echo json_encode(["success" => "Tarea actualizada correctamente", "accion" => "editar"]);
     } else {
         echo json_encode(["error" => "Error al actualizar la tarea"]);
+    }
+    mysqli_stmt_close($stmt);
+}
+elseif ($accion === 'completar') {
+    // Marcar la tarea como completada
+    $usuarioId = $_POST['usuarioId'] ?? 0;
+    $localId = $_POST['localId'] ?? 0;
+    if ($localId == 0) {
+        echo json_encode(["error" => "localId obligatorio"]);
+        exit();
+    }
+    $query = "UPDATE tareas SET completado = 1 WHERE localId = ? AND usuarioId= ?";
+    $stmt = mysqli_prepare($con, $query);
+    mysqli_stmt_bind_param($stmt, "ii", $localId, $usuarioId);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["success" => "Tarea marcada como completada", "accion" => "completar"]);
+    } else {
+        echo json_encode(["error" => "Error al actualizar la tarea"]);
+    }
+    mysqli_stmt_close($stmt);
+} elseif ($accion === 'eliminar') {
+    // Eliminar la tarea
+    $localId = $_POST['localId'] ?? 0;
+    $usuarioId = $_POST['usuarioId'] ?? 0;
+    if ($localId == 0) {
+        echo json_encode(["error" => "localId obligatorio"]);
+        exit();
+    }
+    $query = "DELETE FROM tareas WHERE localId = ? AND usuarioId= ?";
+    $stmt = mysqli_prepare($con, $query);
+    mysqli_stmt_bind_param($stmt, "ii", $localId, $usuarioId);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["success" => "Tarea eliminada correctamente", "accion" => "eliminar"]);
+    } else {
+        echo json_encode(["error" => "Error al eliminar la tarea"]);
     }
     mysqli_stmt_close($stmt);
 }
